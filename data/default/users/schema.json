@@ -1,0 +1,18 @@
+{
+  "tableName": "users",
+  "columns": {
+    "company": {
+      "type": "int",
+      "primary": true,
+      "indexPath": "./company/index.json"
+    },
+    "id": {
+      "type": "integer",
+      "primary": true,
+      "indexPath": "./id/index.json"
+    },
+    "name": {
+      "type": "string"
+    }
+  }
+}

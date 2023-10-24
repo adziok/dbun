@@ -1,0 +1,9 @@
+{
+  "databaseName": "default",
+  "tables": [
+    {
+      "name": "users",
+      "path": "./users/schema.json"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "databases": [
+    {
+      "name": "default",
+      "path": "./default/schema.json"
+    }
+  ]
+}
