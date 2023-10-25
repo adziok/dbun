@@ -3,7 +3,13 @@
   "module": "index.ts",
   "type": "module",
   "devDependencies": {
-    "bun-types": "latest"
+    "bun-types": "latest",
+    "@types/supertest": "^2.0.12",
+    "@typescript-eslint/eslint-plugin": "5.48.1",
+    "@typescript-eslint/parser": "5.48.1",
+    "eslint": "~8.32.0",
+    "eslint-config-prettier": "8.6.0",
+    "prettier": "^2.8.3"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"

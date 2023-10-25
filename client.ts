@@ -1,6 +1,6 @@
 const socket = await Bun.connect({
   port: 8088,
-  hostname: "localhost",
+  hostname: 'localhost',
   socket: {
     data(socket, data) {
       console.log(data);
@@ -14,12 +14,13 @@ const socket = await Bun.connect({
 
     // client-specific handlers
     connectError(socket, error) {
-      console.log(error);}, // connection failed
+      console.log(error);
+    }, // connection failed
     end(socket) {
-      console.log("end");
+      console.log('end');
     }, // connection closed by server
     timeout(socket) {
-      console.log("timeout");
+      console.log('timeout');
     }, // connection timed out
   },
 });

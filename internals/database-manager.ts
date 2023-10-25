@@ -20,6 +20,7 @@ type ColumnMetadata = {
 
 type TableMetadata = {
   "tableName": string,
+  indexes: Record<string,IndexMetadata>
   "columns": ColumnMetadata[]
 }
 
@@ -51,7 +52,12 @@ export class DatabaseManager {
 
   private async loadMetadata() {
     const core = await Bun.file(this.pathToData+"/schema.json", { type: "application/json" }).json() as unknown as RootMetadata;
-    const databases = await Promise.all(core.databases.map(async (database) => {
+    const databases = await this.paresDatabases()
+    this.metadata = Object.fromEntries(databases.map((database) => [database.name,database.metadata]));
+  }
+
+  private async paresDatabases(core: RootMetadata): Promise<DatabaseMetadata[]> {
+    return Promise.all(core.databases.map(async (database) => {
       const metadata = await Bun.file(this.pathToData + '/' +database.path, { type: "application/json" }).json() as unknown as DatabaseMetadata;
       metadata.tables = await Promise.all(metadata.tables.map(async (table) => {
         const metadata = await Bun.file(this.pathToData +'/'+ database.name +'/' +table.path, { type: "application/json" }).json() as unknown as TableMetadata;
@@ -75,6 +81,6 @@ export class DatabaseManager {
         metadata
       };
     }))
-    this.metadata = Object.fromEntries(databases.map((database) => [database.name,database.metadata]));
+
   }
 }
