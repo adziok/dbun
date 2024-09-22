@@ -3,26 +3,28 @@ type RootMetadata = {
     name: string;
     path: string;
     metadata: DatabaseMetadata;
-  }[]
-}
+  }[];
+};
 
 type IndexMetadata = {
-  "type": string,
-  "parts": Record<string, number>
-}
+  type: string;
+  parts: Record<string, (number | string)[]>;
+};
 
 type ColumnMetadata = {
+  name: string;
   type: 'string' | 'int';
   indexPath?: string;
-  index?: IndexMetadata
+  index?: IndexMetadata;
   primary?: boolean;
-}
+  pathToPartsFolder: string;
+};
 
 type TableMetadata = {
-  "tableName": string,
-  indexes: Record<string,IndexMetadata>
-  "columns": ColumnMetadata[]
-}
+  tableName: string;
+  columns: Record<string, ColumnMetadata>;
+  parts: string[];
+};
 
 type DatabaseMetadata = {
   name: string;
@@ -30,8 +32,9 @@ type DatabaseMetadata = {
     name: string;
     path: string;
     metadata: TableMetadata;
-  }[]
-}
+  }[];
+};
+
 export class DatabaseManager {
   private metadata!: Record<string, DatabaseMetadata>;
   constructor(private readonly pathToData: string) {
@@ -39,7 +42,7 @@ export class DatabaseManager {
   }
 
   getMetadataForTable(database: string, table: string): TableMetadata {
-    const db= this.metadata[database];
+    const db = this.metadata[database];
     if (db === undefined) {
       throw new Error(`Database ${database} not found`);
     }
@@ -51,36 +54,68 @@ export class DatabaseManager {
   }
 
   private async loadMetadata() {
-    const core = await Bun.file(this.pathToData+"/schema.json", { type: "application/json" }).json() as unknown as RootMetadata;
-    const databases = await this.paresDatabases()
-    this.metadata = Object.fromEntries(databases.map((database) => [database.name,database.metadata]));
-  }
+    const core = await Bun.file(`${this.pathToData}/schema.json`, {
+      type: 'application/json',
+    }).json<RootMetadata>();
 
-  private async paresDatabases(core: RootMetadata): Promise<DatabaseMetadata[]> {
-    return Promise.all(core.databases.map(async (database) => {
-      const metadata = await Bun.file(this.pathToData + '/' +database.path, { type: "application/json" }).json() as unknown as DatabaseMetadata;
-      metadata.tables = await Promise.all(metadata.tables.map(async (table) => {
-        const metadata = await Bun.file(this.pathToData +'/'+ database.name +'/' +table.path, { type: "application/json" }).json() as unknown as TableMetadata;
-        metadata.columns = Object.fromEntries(await Promise.all(Object.entries(metadata.columns).map(async ([name,column]) => {
-          if (column.indexPath) {
-            const index = await Bun.file(this.pathToData +'/'+ database.name +'/'+ table.name +'/' +column.indexPath, { type: "application/json" }).json() as unknown as IndexMetadata
-            return [name,{
-              ...column,
-              index
-            }];
-          }
-          return [name,column];
-        })))
+    const databases = await Promise.all(
+      core.databases.map(async (database) => {
+        const metadata = await Bun.file(`${this.pathToData}/${database.path}`, {
+          type: 'application/json',
+        }).json<DatabaseMetadata>();
+
+        metadata.tables = await Promise.all(
+          metadata.tables.map(async (table) => {
+            const metadata = await Bun.file(
+              `${this.pathToData}/${database.name}/${table.path}`,
+              { type: 'application/json' },
+            ).json<TableMetadata>();
+
+            metadata.columns = Object.fromEntries(
+              await Promise.all(
+                Object.entries(metadata.columns).map(async ([name, column]) => {
+                  if (column.indexPath) {
+                    const index = await Bun.file(
+                      `${this.pathToData}/${database.name}/${table.name}/${column.indexPath}`,
+                      { type: 'application/json' },
+                    ).json<IndexMetadata>();
+
+                    return [
+                      name,
+                      {
+                        ...column,
+                        index,
+                        pathToPartsFolder: `${this.pathToData}/${database.name}/${table.name}/${name}/`,
+                      },
+                    ];
+                  }
+
+                  return [
+                    name,
+                    {
+                      ...column,
+                      pathToPartsFolder: `${this.pathToData}/${database.name}/${table.name}/${name}/`,
+                    },
+                  ];
+                }),
+              ),
+            );
+
+            return {
+              ...table,
+              metadata,
+            };
+          }),
+        );
+
         return {
-          ...table,
-          metadata
+          ...database,
+          metadata,
         };
-      }))
-      return {
-        ...database,
-        metadata
-      };
-    }))
-
+      }),
+    );
+    this.metadata = Object.fromEntries(
+      databases.map((database) => [database.name, database.metadata]),
+    );
   }
 }

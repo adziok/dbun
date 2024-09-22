@@ -7,12 +7,13 @@
       "indexPath": "./company/index.json"
     },
     "id": {
-      "type": "integer",
+      "type": "int",
       "primary": true,
       "indexPath": "./id/index.json"
     },
     "name": {
       "type": "string"
     }
-  }
+  },
+  "parts": [1,2]
 }
