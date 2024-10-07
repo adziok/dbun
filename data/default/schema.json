@@ -1,9 +1,17 @@
 {
-  "databaseName": "default",
+  "name": "default",
   "tables": [
     {
       "name": "users",
       "path": "./users/schema.json"
+    },
+    {
+      "name": "companies",
+      "path": "./companies/schema.json"
+    },
+    {
+      "name": "firmy",
+      "path": "./firmy/schema.json"
     }
   ]
 }

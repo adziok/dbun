@@ -4,8 +4,9 @@ export class LoadDataPlanStep extends PlanStep {
   constructor(
     public readonly options: {
       dataPath: string;
-      columns: { name: string; pathToPartsFolder: string }[];
+      columns: { name: string; pathToPartsFolder: string; type: string }[];
       parts: string[];
+      totalPartsCount: number;
     },
   ) {
     super();
@@ -16,7 +17,7 @@ export class LoadDataPlanStep extends PlanStep {
       `LoadDataPlanStep:`,
       `Columns: ${this.options.columns.map((c) => c.name).join(', ')}`,
       `From: ${this.options.dataPath}`,
-      `Parts: (${this.options.parts.length}) ${this.options.parts.join(', ')}`,
+      `Parts: (${this.options.parts.length}/${this.options.totalPartsCount})`, // ${this.options.parts.join(', ')}`,
     ];
   }
 

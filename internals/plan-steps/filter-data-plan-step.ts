@@ -23,22 +23,18 @@ class DynamicConditionBuilder {
       };
     }
 
-    if (where.operator === '!=' || where.operator === '=') {
-      // TODO add type checks based on table configuration
-      return (filteredEntry: any) => {
-        const left =
-          where.left.type === 'column_ref'
-            ? filteredEntry[where.left.column]
-            : where.left.value;
-        const right =
-          where.right.type === 'column_ref'
-            ? filteredEntry[where.right.column]
-            : where.right.value;
-        return compare(left, where.operator, right);
-      };
-    }
-
-    throw new Error(`Unsupported operator: ${where}`);
+    // TODO add type checks based on table configuration
+    return (filteredEntry: any) => {
+      const left =
+        where.left.type === 'column_ref'
+          ? filteredEntry[where.left.column]
+          : where.left.value;
+      const right =
+        where.right.type === 'column_ref'
+          ? filteredEntry[where.right.column]
+          : where.right.value;
+      return compare(left, where.operator, right);
+    };
   }
 }
 

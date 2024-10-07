@@ -1,45 +1,13 @@
-type RootMetadata = {
-  databases: {
-    name: string;
-    path: string;
-    metadata: DatabaseMetadata;
-  }[];
-};
-
-type IndexMetadata = {
-  type: string;
-  parts: Record<string, (number | string)[]>;
-};
-
-type ColumnMetadata = {
-  name: string;
-  type: 'string' | 'int';
-  indexPath?: string;
-  index?: IndexMetadata;
-  primary?: boolean;
-  pathToPartsFolder: string;
-};
-
-type TableMetadata = {
-  tableName: string;
-  columns: Record<string, ColumnMetadata>;
-  parts: string[];
-};
-
-type DatabaseMetadata = {
-  name: string;
-  tables: {
-    name: string;
-    path: string;
-    metadata: TableMetadata;
-  }[];
-};
+import {
+  DatabaseMetadata,
+  IndexMetadata,
+  RootMetadata,
+  TableMetadata,
+} from './types.ts';
 
 export class DatabaseManager {
   private metadata!: Record<string, DatabaseMetadata>;
-  constructor(private readonly pathToData: string) {
-    this.loadMetadata();
-  }
+  constructor(private readonly pathToData: string) {}
 
   getMetadataForTable(database: string, table: string): TableMetadata {
     const db = this.metadata[database];
@@ -53,7 +21,7 @@ export class DatabaseManager {
     return metadata.metadata;
   }
 
-  private async loadMetadata() {
+  async loadMetadata() {
     const core = await Bun.file(`${this.pathToData}/schema.json`, {
       type: 'application/json',
     }).json<RootMetadata>();
@@ -117,5 +85,7 @@ export class DatabaseManager {
     this.metadata = Object.fromEntries(
       databases.map((database) => [database.name, database.metadata]),
     );
+
+    return this;
   }
 }

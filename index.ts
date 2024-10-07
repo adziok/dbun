@@ -1,6 +1,6 @@
 import { Socket } from 'bun';
 import { SqlParser } from './internals/sql-parser/sql-parser.ts';
-import { DatabaseManager } from './internals/database-manager.ts';
+import { DatabaseManager } from './internals/database-manager/database-manager.ts';
 import { QueryExecutor } from './internals/query-executor.ts';
 import { QueryPlanner } from './internals/query-planner.ts';
 import { FilterDataPlanStep } from './internals/plan-steps/filter-data-plan-step.ts';
@@ -54,25 +54,27 @@ const server = Bun.listen<SocketData>({
   },
 });
 
-const databaseManager = new DatabaseManager('./data');
+const databaseManager = await new DatabaseManager('./data').loadMetadata();
 setTimeout(async () => {
   const parsedQuery = SqlParser.parse(
-    `SELECT name, id FROM users WHERE company = 1 AND (name = "Adi" OR name = "Mosti");`,
+    `SELECT name FROM users WHERE company = 1 AND name = 'Adi';`,
     'default',
   );
+
+  // const parsedQuery = SqlParser.parse(`SELECT name FROM users;`, 'default');
   const queryPlanner = new QueryPlanner(databaseManager);
   const queryExecutor = new QueryExecutor();
 
-  const plan = queryPlanner.planQuery(parsedQuery);
-  plan.setNextStep(
-    new FilterDataPlanStep({
-      filters: parsedQuery.where,
-    }),
-  );
+  const plan = queryPlanner.planQuery(parsedQuery, {
+    enablePreWhereStep: true,
+  });
 
   console.log(queryExecutor.describePlan(plan));
+  console.time('execute');
   const res = await queryExecutor.execute(plan);
   console.log(res);
+  console.timeEnd('execute');
+  process.exit(1);
 }, 1000);
 //
 // server.reload({

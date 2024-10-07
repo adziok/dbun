@@ -1,9 +1,14 @@
 import { FilterDataPlanStep } from './plan-steps/filter-data-plan-step.ts';
 import { PlanStep } from './plan-steps/base-plan-step.ts';
 import { LoadDataPlanStep } from './plan-steps/load-data-plan-step.ts';
+import { PreWherePlanStep } from './plan-steps/prewhere-plan-step.ts';
 
 export class QueryExecutor {
-  async execute(planStep: PlanStep) {
+  async execute(planStep: PlanStep): Promise<any[]> {
+    if (planStep instanceof PreWherePlanStep) {
+      return await this.execute(planStep.nextStep!);
+    }
+
     if (!(planStep instanceof LoadDataPlanStep)) {
       throw new Error('Invalid plan step');
     }
@@ -45,6 +50,7 @@ export class QueryExecutor {
         result = result.concat(objects);
       }
     }
+
     return result;
   }
 

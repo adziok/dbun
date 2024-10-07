@@ -1,46 +1,100 @@
 import { ParsedSqlQuery } from './sql-parser/sql-parser.ts';
-import { DatabaseManager } from './database-manager.ts';
+import { DatabaseManager } from './database-manager/database-manager.ts';
 import { onlyUnique } from './utils.ts';
 import { PlanStep } from './plan-steps/base-plan-step.ts';
 import { LoadDataPlanStep } from './plan-steps/load-data-plan-step.ts';
+import { PreWherePlanStep } from './plan-steps/prewhere-plan-step.ts';
+import { FilterDataPlanStep } from './plan-steps/filter-data-plan-step.ts';
 
 export class QueryPlanner {
   constructor(private readonly databaseManager: DatabaseManager) {}
-  planQuery(query: ParsedSqlQuery): PlanStep {
+
+  planQuery(
+    query: ParsedSqlQuery,
+    options: { enablePreWhereStep: boolean } = { enablePreWhereStep: true },
+  ): PlanStep {
+    let planStep = this._planQuery(query, options);
+
+    if (query?.where) {
+      planStep.pushStep(
+        new FilterDataPlanStep({
+          filters: query.where,
+        }),
+      );
+    }
+
+    return planStep;
+  }
+
+  private _planQuery(
+    query: ParsedSqlQuery,
+    options: { enablePreWhereStep: boolean } = { enablePreWhereStep: true },
+  ): PlanStep {
     const table = this.databaseManager.getMetadataForTable(
       query.database,
       query.table,
     );
 
-    const loadColumns = [...query.columns];
-
-    const partsToLoad = Object.entries(table.columns)
-      .map(([name, column]) => {
-        // TODO - implement prewhere
-        const shouldPreWhere = false; //query.where[name] !== undefined;
-
-        // if (shouldPreWhere && column.index) {
-        //   return Object.entries(column.index.parts)
-        //     .filter(([key, values]) =>
-        //       values.includes(typeTransformers[column.type](query.where[name])),
-        //     )
-        //     .map(([key]) => key);
-        // }
-        return table.parts;
+    const loadColumns = query.columns
+      .map((d) => {
+        if (d === '*') {
+          return Object.keys(table.columns);
+        }
+        return d;
       })
-      .flat()
-      .filter(onlyUnique)
-      .filter((d) => d !== undefined) as string[];
+      .flat();
+
+    const indexedColumnsUsedInWhere = Object.entries(table.columns).filter(
+      ([name, column]) => {
+        return (
+          column.index !== undefined && query.columnsUsedInWhere.includes(name)
+        );
+      },
+    );
+
+    const shouldPreWhereColumn =
+      Object.keys(indexedColumnsUsedInWhere).length > 0 &&
+      options.enablePreWhereStep;
+
+    if (shouldPreWhereColumn) {
+      const preWherePlanStep = new PreWherePlanStep({
+        filters: query.where,
+        indexes: Object.fromEntries(indexedColumnsUsedInWhere),
+        allParts: table.parts,
+      });
+      const partsToLoad = preWherePlanStep.getParts();
+
+      return preWherePlanStep.pushStep(
+        new LoadDataPlanStep({
+          parts: partsToLoad,
+          totalPartsCount: table.parts.length,
+          dataPath: table.tableName,
+          columns: loadColumns.map((column) => {
+            const pathToPartsFolder = table.columns[column].pathToPartsFolder;
+            const type = table.columns[column].type;
+
+            return {
+              name: column,
+              pathToPartsFolder,
+              type,
+            };
+          }),
+        }),
+      );
+    }
 
     return new LoadDataPlanStep({
-      parts: partsToLoad,
-      dataPath: 'aaa', // TODO - implement data path
+      parts: table.parts,
+      totalPartsCount: table.parts.length,
+      dataPath: table.tableName,
       columns: loadColumns.map((column) => {
         const pathToPartsFolder = table.columns[column].pathToPartsFolder;
+        const type = table.columns[column].type;
 
         return {
           name: column,
           pathToPartsFolder,
+          type,
         };
       }),
     });
