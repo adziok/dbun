@@ -17,4 +17,13 @@ export abstract class PlanStep {
 
     return this;
   }
+
+  findStep<StepType extends PlanStep>(step: any): StepType | undefined {
+    if (this instanceof step) {
+      return this as unknown as StepType;
+    }
+    if (this.nextStep) {
+      return this.nextStep.findStep(step);
+    }
+  }
 }

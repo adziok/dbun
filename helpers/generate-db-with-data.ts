@@ -2,44 +2,101 @@ import { faker } from '@faker-js/faker/locale/en';
 import { RawDatabaseMetadata } from '../internals/database-manager/raw-types.ts';
 import { onlyUnique } from '../internals/utils.ts';
 
+const originIataCode = [
+  'LHR',
+  'CDG',
+  'FRA',
+  'IST',
+  'MAD',
+  'AMS',
+  'FCO',
+  'MUC',
+  'BCN',
+  'LGW',
+  'ORY',
+  'CPH',
+  'ARN',
+  'DUS',
+  'OSL',
+  'ZRH',
+  'BRU',
+  'VIE',
+  'CPH',
+  'ARN',
+  'DUS',
+  'OSL',
+  'ZRH',
+  'BRU',
+  'VIE',
+  'MUC',
+  'FCO',
+  'BCN',
+  'LGW',
+];
+const destinationIataCode = [
+  'JFK',
+  'LAX',
+  'HND',
+  'ORD',
+  'LHR',
+  'PVG',
+  'CDG',
+  'DFW',
+  'CAN',
+  'AMS',
+  'FRA',
+  'SIN',
+  'IST',
+  'HKG',
+  'DXB',
+  'DEN',
+  'BKK',
+  'DEL',
+  'ICN',
+  'CGK',
+  'SFO',
+  'LAS',
+  'MCO',
+  'JNB',
+  'SEA',
+  'ATL',
+  'CLT',
+  'PHX',
+];
+
 const configuration = {
   parts: 20000,
-  recordsPerPart: 1000,
+  recordsPerPart: 8000,
   db: 'default',
   tables: [
     {
-      tableName: 'firmy',
+      tableName: 'tickets',
       columns: {
-        id: {
-          type: 'int',
-          // primary: true,
-          factory: (index: number) => index + 1,
-        },
-        name: {
+        origin: {
           type: 'string',
           primary: true,
-          factory: (index: number) => faker.company.name(),
+          factory: () => faker.helpers.arrayElement(originIataCode),
         },
-        numberOfEmployers: {
+        destination: {
+          type: 'string',
+          primary: true,
+          factory: () => faker.helpers.arrayElement(destinationIataCode),
+        },
+        name: {
+          type: 'bookingClass',
+          factory: () => faker.string.alpha({ length: 1 }),
+        },
+        price: {
           type: 'int',
-          factory: (index: number) =>
+          factory: () =>
             faker.number.int({
               min: 50,
               max: 1000,
             }),
         },
-        revenue: {
+        pax: {
           type: 'int',
-          factory: (index: number) =>
-            faker.number.int({
-              min: 1000000,
-              max: 1000000000,
-            }),
-        },
-        city: {
-          type: 'string',
-          primary: true,
-          factory: (index: number) => faker.location.city(),
+          factory: () => faker.helpers.arrayElement([-1, 1, 1, 1, 1, 1]),
         },
       },
     },

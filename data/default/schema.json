@@ -12,6 +12,10 @@
     {
       "name": "firmy",
       "path": "./firmy/schema.json"
+    },
+    {
+      "name": "tickets",
+      "path": "./tickets/schema.json"
     }
   ]
 }

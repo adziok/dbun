@@ -4,6 +4,7 @@ import { DatabaseManager } from './internals/database-manager/database-manager.t
 import { QueryExecutor } from './internals/query-executor.ts';
 import { QueryPlanner } from './internals/query-planner.ts';
 import { FilterDataPlanStep } from './internals/plan-steps/filter-data-plan-step.ts';
+import { OrderDataPlanStep } from './internals/plan-steps/order-data-plan-step.ts';
 
 type SocketData = { sessionId: string };
 
@@ -56,12 +57,16 @@ const server = Bun.listen<SocketData>({
 
 const databaseManager = await new DatabaseManager('./data').loadMetadata();
 setTimeout(async () => {
+  // const parsedQuery = SqlParser.parse(
+  //   `SELECT name FROM users ORDER BY name DESC;`,
+  //   'default',
+  // );
+
   const parsedQuery = SqlParser.parse(
-    `SELECT name FROM users WHERE company = 1 AND name = 'Adi';`,
+    `SELECT * FROM companies WHERE name = 'Bashirian LLC' ORDER BY id ASC LIMIT 10 OFFSET 10;`,
     'default',
   );
-
-  // const parsedQuery = SqlParser.parse(`SELECT name FROM users;`, 'default');
+  // const parsedQuery = SqlParser.parse(`SELECT * FROM tickets;`, 'default');
   const queryPlanner = new QueryPlanner(databaseManager);
   const queryExecutor = new QueryExecutor();
 

@@ -4,6 +4,7 @@ import {
   extractWhereColumns,
   validateWhereStatement,
 } from './where-validator.ts';
+import { DatabaseManager } from '../database-manager/database-manager.ts';
 
 export type ParsedSqlQuery = {
   database: string;
@@ -11,6 +12,16 @@ export type ParsedSqlQuery = {
   table: string;
   where: WhereStatement;
   columnsUsedInWhere: string[];
+  orderBys?: {
+    expr: {
+      type: 'column_ref';
+      table: null;
+      column: string;
+    };
+    type: 'DESC' | 'ASC';
+  }[];
+  limit?: number;
+  offset?: number;
 };
 
 export class SqlParser {
@@ -21,12 +32,13 @@ export class SqlParser {
       database: 'MySQL',
       type: 'select',
     });
-    const whereStatement = (ast.ast as Select[])[0]
-      .where as any as WhereStatement;
+    const selectAst = (ast.ast as Select[])[0];
+
+    const whereStatement = selectAst.where as any as WhereStatement;
     whereStatement &&
-      validateWhereStatement(
-        (ast.ast as Select[])[0].where as any as WhereStatement,
-      );
+      validateWhereStatement(selectAst.where as any as WhereStatement);
+
+    // console.log(JSON.stringify(selectAst, null, 2));
 
     return {
       // TODO
@@ -44,10 +56,11 @@ export class SqlParser {
       database,
       columnsUsedInWhere:
         (whereStatement &&
-          extractWhereColumns(
-            (ast.ast as Select[])[0].where as any as WhereStatement,
-          )) ||
+          extractWhereColumns(selectAst.where as any as WhereStatement)) ||
         [],
+      orderBys: selectAst.orderby as any,
+      limit: selectAst.limit?.value?.[0]?.value,
+      offset: selectAst.limit?.value?.[1]?.value,
     };
   }
 }

@@ -5,6 +5,9 @@ import { PlanStep } from './plan-steps/base-plan-step.ts';
 import { LoadDataPlanStep } from './plan-steps/load-data-plan-step.ts';
 import { PreWherePlanStep } from './plan-steps/prewhere-plan-step.ts';
 import { FilterDataPlanStep } from './plan-steps/filter-data-plan-step.ts';
+import { OrderDataPlanStep } from './plan-steps/order-data-plan-step.ts';
+import { LimitDataPlanStep } from './plan-steps/limit-data-plan-step.ts';
+import { OffsetDataPlanStep } from './plan-steps/offset-data-plan-step.ts';
 
 export class QueryPlanner {
   constructor(private readonly databaseManager: DatabaseManager) {}
@@ -19,6 +22,30 @@ export class QueryPlanner {
       planStep.pushStep(
         new FilterDataPlanStep({
           filters: query.where,
+        }),
+      );
+    }
+
+    if (query?.orderBys) {
+      planStep?.pushStep(
+        new OrderDataPlanStep({
+          orderBys: query.orderBys,
+        }),
+      );
+    }
+
+    if (query?.limit) {
+      planStep?.pushStep(
+        new LimitDataPlanStep({
+          limit: query.limit,
+        }),
+      );
+    }
+
+    if (query?.offset) {
+      planStep?.pushStep(
+        new OffsetDataPlanStep({
+          offset: query.offset,
         }),
       );
     }
