@@ -71,84 +71,84 @@ describe('ORDER BY', () => {
 
     expect(res).toEqual([
       {
-        company: '1',
-        id: '5',
+        company: 1,
+        id: 5,
       },
       {
-        company: '1',
-        id: '4',
+        company: 1,
+        id: 4,
       },
       {
-        company: '1',
-        id: '2',
+        company: 1,
+        id: 2,
       },
       {
-        company: '1',
-        id: '1',
+        company: 1,
+        id: 1,
       },
       {
-        company: '2',
-        id: '9',
+        company: 2,
+        id: 9,
       },
       {
-        company: '2',
-        id: '8',
+        company: 2,
+        id: 8,
       },
       {
-        company: '2',
-        id: '7',
+        company: 2,
+        id: 7,
       },
       {
-        company: '2',
-        id: '6',
+        company: 2,
+        id: 6,
       },
       {
-        company: '2',
-        id: '3',
+        company: 2,
+        id: 3,
       },
       {
-        company: '3',
-        id: '15',
+        company: 3,
+        id: 15,
       },
       {
-        company: '3',
-        id: '14',
+        company: 3,
+        id: 14,
       },
       {
-        company: '3',
-        id: '13',
+        company: 3,
+        id: 13,
       },
       {
-        company: '3',
-        id: '12',
+        company: 3,
+        id: 12,
       },
       {
-        company: '3',
-        id: '11',
+        company: 3,
+        id: 11,
       },
       {
-        company: '3',
-        id: '10',
+        company: 3,
+        id: 10,
       },
       {
-        company: '4',
-        id: '20',
+        company: 4,
+        id: 20,
       },
       {
-        company: '4',
-        id: '19',
+        company: 4,
+        id: 19,
       },
       {
-        company: '4',
-        id: '18',
+        company: 4,
+        id: 18,
       },
       {
-        company: '4',
-        id: '17',
+        company: 4,
+        id: 17,
       },
       {
-        company: '4',
-        id: '16',
+        company: 4,
+        id: 16,
       },
     ]);
   });

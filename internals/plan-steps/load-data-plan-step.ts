@@ -21,12 +21,12 @@ export class LoadDataPlanStep extends PlanStep {
     ];
   }
 
-  getPartsPathsGrouped(): Record<string, string>[] {
+  getPartsPathsGrouped(): Record<string, { path: string; type: string }>[] {
     return this.options.parts.map((part) =>
       Object.fromEntries(
         this.options.columns.map((c) => [
           c.name,
-          `${c.pathToPartsFolder}${part}.txt`,
+          { path: `${c.pathToPartsFolder}${part}.txt`, type: c.type },
         ]),
       ),
     );

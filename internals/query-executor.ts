@@ -2,7 +2,6 @@ import { FilterDataPlanStep } from './plan-steps/filter-data-plan-step.ts';
 import { PlanStep } from './plan-steps/base-plan-step.ts';
 import { LoadDataPlanStep } from './plan-steps/load-data-plan-step.ts';
 import { PreWherePlanStep } from './plan-steps/prewhere-plan-step.ts';
-import { Effect } from 'effect';
 import pLimit from 'p-limit';
 import { OrderDataPlanStep } from './plan-steps/order-data-plan-step.ts';
 import { OffsetDataPlanStep } from './plan-steps/offset-data-plan-step.ts';
@@ -26,67 +25,26 @@ export class QueryExecutor {
 
     const partsToLoad = planStep.getPartsPathsGrouped();
 
-    // const result2 = Effect.all(
-    //   partsToLoad.map((partToLoad) => {
-    //     const columnNames = Object.keys(partToLoad);
-    //
-    //     return Effect.tryPromise(() =>
-    //       Promise.all(
-    //         Object.entries(partToLoad).map(
-    //           async ([columnName, path]): Promise<string[]> => {
-    //             return (
-    //               await Bun.file(path, {
-    //                 type: 'text',
-    //               }).text()
-    //             ).split('\n');
-    //           },
-    //         ),
-    //       ),
-    //     ).pipe(
-    //       Effect.map((data) => {
-    //         const objects: Record<string, string>[] = [];
-    //         data[0].forEach((_: any, rawColumnValueRowIndex: number) => {
-    //           const obj: Record<string, string> = {};
-    //           columnNames.forEach((columnName, columnIndex) => {
-    //             obj[columnName] = data[columnIndex][rawColumnValueRowIndex];
-    //           });
-    //           objects.push(obj);
-    //         });
-    //
-    //         const filters =
-    //           planStep.nextStep instanceof FilterDataPlanStep
-    //             ? planStep.nextStep.getFilterConditionForColumn()
-    //             : null;
-    //
-    //         if (filters) {
-    //           mutationFilter(objects, filters);
-    //         }
-    //         return objects;
-    //       }),
-    //     );
-    //   }),
-    //   {
-    //     concurrency: 16,
-    //   },
-    // );
-    //
-    // const res = await Effect.runPromise(result2);
-    //
-    // return res.flat();
-
-    // ========================================================================================================================
     const limit = pLimit(16);
 
-    const parsePart = async (partToLoad: Record<string, string>) => {
+    const parsePart = async (
+      partToLoad: Record<string, { path: string; type: string }>,
+    ) => {
       const columnNames = Object.keys(partToLoad);
       const rawData = await Promise.all(
         Object.entries(partToLoad).map(
-          async ([columnName, path]): Promise<string[]> => {
-            return (
+          async ([columnName, { path, type }]): Promise<
+            (string | number)[]
+          > => {
+            const raw = (
               await Bun.file(path, {
                 type: 'text',
               }).text()
             ).split('\n');
+            if (type === 'int') {
+              return raw.map((r) => parseInt(r, 10));
+            }
+            return raw;
           },
         ),
       );
@@ -95,9 +53,9 @@ export class QueryExecutor {
           ? planStep.nextStep.getFilterConditionForColumn()
           : null;
 
-      const objects: Record<string, string>[] = [];
+      const objects: Record<string, string | number>[] = [];
       rawData[0].forEach((_: any, rawColumnValueRowIndex: number) => {
-        const obj: Record<string, string> = {};
+        const obj: Record<string, string | number> = {};
         columnNames.forEach((columnName, columnIndex) => {
           obj[columnName] = rawData[columnIndex][rawColumnValueRowIndex];
         });
@@ -139,93 +97,6 @@ export class QueryExecutor {
     }
 
     return result;
-
-    // ========================================================================================================================
-    // const limit = pLimit(16);
-    //
-    // const parsePart = async (partToLoad: Record<string, string>) => {
-    //   const rawData = await Promise.all(
-    //     Object.entries(partToLoad).map(async ([columnName, path]) => {
-    //       return [
-    //         columnName,
-    //         (
-    //           await Bun.file(path, {
-    //             type: 'text',
-    //           }).text()
-    //         ).split('\n'),
-    //       ];
-    //     }),
-    //   );
-    //   const data = Object.fromEntries(rawData);
-    //   const keys = Object.keys(data);
-    //   const filters =
-    //     planStep.nextStep instanceof FilterDataPlanStep
-    //       ? planStep.nextStep.getFilterConditionForColumn()
-    //       : null;
-    //
-    //   const objects = data[keys[0]].map((_: any, index: number) => {
-    //     const obj: Record<string, string> = {};
-    //     keys.forEach((key) => {
-    //       obj[key] = data[key][index];
-    //     });
-    //     return obj;
-    //   });
-    //
-    //   if (filters) {
-    //     return objects.filter(filters);
-    //   } else {
-    //     return objects;
-    //   }
-    // };
-    //
-    // let promises = partsToLoad.map((partToLoad) => {
-    //   // wrap the function we are calling in the limit function we defined above
-    //   return limit(() => parsePart(partToLoad));
-    // });
-    //
-    // const result = await Promise.all(promises);
-    //
-    // return result.flat();
-
-    // ========================================================================================================================
-
-    // let result: any[] = [];
-    // for await (const partToLoad of partsToLoad) {
-    //   const rawData = await Promise.all(
-    //     Object.entries(partToLoad).map(async ([columnName, path]) => {
-    //       return [
-    //         columnName,
-    //         (
-    //           await Bun.file(path, {
-    //             type: 'text',
-    //           }).text()
-    //         ).split('\n'),
-    //       ];
-    //     }),
-    //   );
-    //   const data = Object.fromEntries(rawData);
-    //   const keys = Object.keys(data);
-    //   const filters =
-    //     planStep.nextStep instanceof FilterDataPlanStep
-    //       ? planStep.nextStep.getFilterConditionForColumn()
-    //       : null;
-    //
-    //   const objects = data[keys[0]].map((_: any, index: number) => {
-    //     const obj: Record<string, string> = {};
-    //     keys.forEach((key) => {
-    //       obj[key] = data[key][index];
-    //     });
-    //     return obj;
-    //   });
-    //
-    //   if (filters) {
-    //     result.push(...objects.filter(filters));
-    //   } else {
-    //     result.push(...objects);
-    //   }
-    // }
-    //
-    // return result;
   }
 
   describePlan(planStep: PlanStep): string[] {
