@@ -81,7 +81,10 @@ class DynamicConditionBuilder {
       ).columns[whereReference.column].type;
     }
     if (whereReference.type === 'number') {
-      return 'number';
+      if (Number.isInteger(whereReference.value)) {
+        return 'int';
+      }
+      return 'float';
     }
     if (whereReference.type === 'string') {
       return 'string';

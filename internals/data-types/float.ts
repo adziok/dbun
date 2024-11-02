@@ -1,8 +1,8 @@
 import { DataType } from './data-type';
-import { FloatDataType } from './float.ts';
+import { IntDataType } from './int.ts';
 
-export class IntDataType extends DataType<number> {
-  name = 'int';
+export class FloatDataType extends DataType<number> {
+  name = 'float';
 
   canBeComparedWith<AnotherType>(anotherType: AnotherType): boolean {
     const supportedCompareTypes = [IntDataType, FloatDataType];
@@ -17,10 +17,10 @@ export class IntDataType extends DataType<number> {
   }
 
   fromString(value: string): number {
-    return parseInt(value, 10);
+    return parseFloat(value);
   }
 
   static fromString(value: string): number {
-    return parseInt(value, 10);
+    return parseFloat(value);
   }
 }

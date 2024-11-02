@@ -7,6 +7,7 @@ import { IntDataType } from './int';
 import { StringDataType } from './string';
 import { TimestampDataType } from './timestamp.ts';
 import { BooleanDataType } from './boolean.ts';
+import { FloatDataType } from './float.ts';
 
 interface Constructor<T> {
   new (): T;
@@ -20,6 +21,7 @@ export const typeNameToDataTypeDirectory: Record<
   int: IntDataType,
   boolean: BooleanDataType,
   timestamp: TimestampDataType,
+  float: FloatDataType,
 };
 
 export const getDateTypeClass = (

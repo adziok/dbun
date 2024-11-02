@@ -66,7 +66,7 @@ setTimeout(async () => {
   // );
   // const parsedQuery = SqlParser.parse(`SELECT * FROM tickets;`, 'default');
   const parsedQuery = SqlParser.parse(
-    `SELECT * FROM bookings WHERE oneWay = true AND departureDate <= Timestamp('${new Date(
+    `SELECT * FROM bookings WHERE pax > 0.5 AND oneWay = true AND departureDate <= Timestamp('${new Date(
       Date.now(),
     ).toISOString()}');`,
     'default',

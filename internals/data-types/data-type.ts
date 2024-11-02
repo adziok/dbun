@@ -2,7 +2,8 @@ export type supportedDataTypesNames =
   | 'int'
   | 'string'
   | 'boolean'
-  | 'timestamp';
+  | 'timestamp'
+  | 'float';
 export type supportedDataTypes = string | number;
 
 export abstract class DataType<Type> {
