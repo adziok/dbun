@@ -33,15 +33,39 @@ export type StringValueReference = {
 };
 
 export type ColumnReference = {
+  columnType: string;
   type: 'column_ref';
   table: string;
   column: string;
 };
 
+export type FunctionReference = {
+  type: 'function';
+  name: {
+    name: [
+      {
+        type: 'default';
+        value: string;
+      },
+    ];
+  };
+  args: {
+    type: 'expr_list';
+    value: [
+      {
+        type: string;
+        value: string;
+      },
+    ];
+  };
+  over: null;
+};
+
 export type WhereReference =
   | NumberValueReference
   | StringValueReference
-  | ColumnReference;
+  | ColumnReference
+  | FunctionReference;
 
 export type ExecutableWhereStatement = EqWhereStatement | NotEqWhereStatement;
 

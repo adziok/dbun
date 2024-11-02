@@ -65,12 +65,12 @@ const destinationIataCode = [
 ];
 
 const configuration = {
-  parts: 20000,
+  parts: 2000,
   recordsPerPart: 8000,
   db: 'default',
   tables: [
     {
-      tableName: 'tickets',
+      tableName: 'bookings',
       columns: {
         origin: {
           type: 'string',
@@ -83,7 +83,7 @@ const configuration = {
           factory: () => faker.helpers.arrayElement(destinationIataCode),
         },
         name: {
-          type: 'bookingClass',
+          type: 'string',
           factory: () => faker.string.alpha({ length: 1 }),
         },
         price: {
@@ -97,6 +97,24 @@ const configuration = {
         pax: {
           type: 'int',
           factory: () => faker.helpers.arrayElement([-1, 1, 1, 1, 1, 1]),
+        },
+        issueDate: {
+          type: 'timestamp',
+          factory: () =>
+            faker.date.soon({
+              days: 60,
+            }),
+        },
+        departureDate: {
+          type: 'timestamp',
+          factory: () =>
+            faker.date.soon({
+              days: 90,
+            }),
+        },
+        oneWay: {
+          type: 'boolean',
+          factory: () => faker.helpers.arrayElement([-1, 1]),
         },
       },
     },

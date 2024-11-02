@@ -5,6 +5,8 @@ import {
 } from './data-type';
 import { IntDataType } from './int';
 import { StringDataType } from './string';
+import { TimestampDataType } from './timestamp.ts';
+import { BooleanDataType } from './boolean.ts';
 
 interface Constructor<T> {
   new (): T;
@@ -16,6 +18,8 @@ export const typeNameToDataTypeDirectory: Record<
 > = {
   string: StringDataType,
   int: IntDataType,
+  boolean: BooleanDataType,
+  timestamp: TimestampDataType,
 };
 
 export const getDateTypeClass = (

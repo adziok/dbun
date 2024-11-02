@@ -19,9 +19,12 @@ export class QueryPlanner {
 
     if (query?.where) {
       planStep.pushStep(
-        new FilterDataPlanStep({
-          filters: query.where,
-        }),
+        new FilterDataPlanStep(
+          {
+            filters: query.where,
+          },
+          this.databaseManager,
+        ),
       );
     }
 

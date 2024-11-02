@@ -1,6 +1,7 @@
 import { Parser, Select } from 'node-sql-parser';
 import { WhereStatement } from './sql-parser.types.ts';
 import {
+  assignTableToColumRefWhereStatement,
   extractWhereColumns,
   validateWhereStatement,
 } from './where-validator.ts';
@@ -25,7 +26,11 @@ export type ParsedSqlQuery = {
 };
 
 export class SqlParser {
-  static parse(rawSqlQuery: string, database: string): ParsedSqlQuery {
+  static parse(
+    rawSqlQuery: string,
+    database: string,
+    databaseManager: DatabaseManager,
+  ): ParsedSqlQuery {
     const parser = new Parser();
 
     const ast = parser.parse(rawSqlQuery, {
@@ -33,12 +38,12 @@ export class SqlParser {
       type: 'select',
     });
     const selectAst = (ast.ast as Select[])[0];
+    const tableName = ast.tableList[0].split('::')[2];
 
     const whereStatement = selectAst.where as any as WhereStatement;
+    whereStatement && validateWhereStatement(whereStatement);
     whereStatement &&
-      validateWhereStatement(selectAst.where as any as WhereStatement);
-
-    // console.log(JSON.stringify(selectAst, null, 2));
+      assignTableToColumRefWhereStatement(whereStatement, tableName);
 
     return {
       // TODO
@@ -51,13 +56,11 @@ export class SqlParser {
           return d;
         })
         .flat(),
-      table: ast.tableList[0].split('::')[2],
+      table: tableName,
       where: whereStatement,
       database,
       columnsUsedInWhere:
-        (whereStatement &&
-          extractWhereColumns(selectAst.where as any as WhereStatement)) ||
-        [],
+        (whereStatement && extractWhereColumns(whereStatement)) || [],
       orderBys: selectAst.orderby as any,
       limit: selectAst.limit?.value?.[0]?.value,
       offset: selectAst.limit?.value?.[1]?.value,

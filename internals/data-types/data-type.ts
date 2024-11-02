@@ -1,4 +1,8 @@
-export type supportedDataTypesNames = 'int' | 'string';
+export type supportedDataTypesNames =
+  | 'int'
+  | 'string'
+  | 'boolean'
+  | 'timestamp';
 export type supportedDataTypes = string | number;
 
 export abstract class DataType<Type> {

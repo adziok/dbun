@@ -60,11 +60,19 @@ setTimeout(async () => {
   //   'default',
   // );
 
-  const parsedQuery = SqlParser.parse(
-    `SELECT * FROM firmy WHERE name = "Beer, West and Romaguera" ORDER BY id ASC LIMIT 10;`,
-    'default',
-  );
+  // const parsedQuery = SqlParser.parse(
+  //   `SELECT * FROM firmy WHERE name = "Beer, West and Romaguera" ORDER BY id ASC LIMIT 10;`,
+  //   'default',
+  // );
   // const parsedQuery = SqlParser.parse(`SELECT * FROM tickets;`, 'default');
+  const parsedQuery = SqlParser.parse(
+    `SELECT * FROM bookings WHERE oneWay = true AND departureDate <= Timestamp('${new Date(
+      Date.now(),
+    ).toISOString()}');`,
+    'default',
+    databaseManager,
+  );
+  console.log(JSON.stringify(parsedQuery.where, null, 2));
   const queryPlanner = new QueryPlanner(databaseManager);
   const queryExecutor = new QueryExecutor();
 
@@ -75,7 +83,7 @@ setTimeout(async () => {
   console.log(queryExecutor.describePlan(plan));
   console.time('execute');
   const res = await queryExecutor.execute(plan);
-  console.log(res);
+  console.log(res.length);
   console.timeEnd('execute');
   process.exit(1);
 }, 1000);
