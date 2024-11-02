@@ -1,7 +1,7 @@
 import { WhereStatement } from '../sql-parser/sql-parser.types.ts';
 
 import { PlanStep } from './base-plan-step.ts';
-import { compare } from '../utils.ts';
+import { compareInt, getCompareFunction } from '../utils.ts';
 
 class DynamicConditionBuilder {
   buildCondition(where: WhereStatement): (columnValue: unknown) => boolean {
@@ -33,7 +33,9 @@ class DynamicConditionBuilder {
         where.right.type === 'column_ref'
           ? filteredEntry[where.right.column]
           : where.right.value;
-      return compare(left, where.operator, right);
+
+      const compareFn = getCompareFunction('string');
+      return compareFn(left, where.operator, right);
     };
   }
 }

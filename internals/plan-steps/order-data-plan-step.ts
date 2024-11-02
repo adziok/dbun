@@ -1,5 +1,5 @@
 import { PlanStep } from './base-plan-step.ts';
-import { compare } from '../utils.ts';
+import { compareInt, getCompareFunction } from '../utils.ts';
 
 export class OrderDataPlanStep extends PlanStep {
   constructor(
@@ -30,7 +30,9 @@ export class OrderDataPlanStep extends PlanStep {
   getOrderBy(): (first: any, second: any) => boolean {
     return (first: any, second: any) =>
       this.options.orderBys.some((orderBy) => {
-        return compare(
+        // TODO
+        const compareFn = getCompareFunction('string');
+        return compareFn(
           first[orderBy.expr.column],
           (orderBy.type === 'DESC' && '<') || '>',
           second[orderBy.expr.column],

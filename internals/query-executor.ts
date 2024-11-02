@@ -6,6 +6,7 @@ import pLimit from 'p-limit';
 import { OrderDataPlanStep } from './plan-steps/order-data-plan-step.ts';
 import { OffsetDataPlanStep } from './plan-steps/offset-data-plan-step.ts';
 import { LimitDataPlanStep } from './plan-steps/limit-data-plan-step.ts';
+import { getDateTypeClass } from './data-types/get-date-type-class.ts';
 
 function mutationFilter(arr: any[], cb: (a: any) => boolean) {
   for (let l = arr.length - 1; l >= 0; l -= 1) {
@@ -41,10 +42,15 @@ export class QueryExecutor {
                 type: 'text',
               }).text()
             ).split('\n');
-            if (type === 'int') {
-              return raw.map((r) => parseInt(r, 10));
+
+            // To avoid parsing the data if it is a string
+            if (type === 'string') {
+              return raw;
             }
-            return raw;
+
+            const dataType = getDateTypeClass(type);
+
+            return raw.map((r) => dataType.fromString(r));
           },
         ),
       );

@@ -1,6 +1,5 @@
 import { ParsedSqlQuery } from './sql-parser/sql-parser.ts';
 import { DatabaseManager } from './database-manager/database-manager.ts';
-import { onlyUnique } from './utils.ts';
 import { PlanStep } from './plan-steps/base-plan-step.ts';
 import { LoadDataPlanStep } from './plan-steps/load-data-plan-step.ts';
 import { PreWherePlanStep } from './plan-steps/prewhere-plan-step.ts';

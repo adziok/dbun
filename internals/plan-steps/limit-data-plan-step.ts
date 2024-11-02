@@ -1,5 +1,4 @@
 import { PlanStep } from './base-plan-step.ts';
-import { compare } from '../utils.ts';
 
 export class LimitDataPlanStep extends PlanStep {
   constructor(
