@@ -67,8 +67,6 @@ export type WhereReference =
   | ColumnReference
   | FunctionReference;
 
-export type ExecutableWhereStatement = EqWhereStatement | NotEqWhereStatement;
-
 export type WhereStatement =
   | AndWhereStatement
   | OrWhereStatement

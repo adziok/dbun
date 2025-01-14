@@ -17,7 +17,7 @@ export class LoadDataPlanStep extends PlanStep {
       `LoadDataPlanStep:`,
       `Columns: ${this.options.columns.map((c) => c.name).join(', ')}`,
       `From: ${this.options.dataPath}`,
-      `Parts: (${this.options.parts.length}/${this.options.totalPartsCount})`, // ${this.options.parts.join(', ')}`,
+      `Parts: (${this.options.parts.length}/${this.options.totalPartsCount})`,
     ];
   }
 

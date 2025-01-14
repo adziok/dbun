@@ -3,11 +3,25 @@ const socket = await Bun.connect({
   hostname: 'localhost',
   socket: {
     data(socket, data) {
-      console.log(data);
+      const res = Buffer.from(data).toString();
+      const parsedRes = JSON.parse(res);
+      console.log(parsedRes);
+
+      process.exit(1);
     },
-    open(socket) {},
-    close(socket) {},
-    drain(socket) {},
+    open(socket) {
+      console.log('open');
+      socket.write(`
+        -- Comment
+        SELECT * FROM rezerwacje WHERE origin = 'CDG' AND oneWay = true LIMIT 10 OFFSET 10 ORDER BY price;
+      `);
+    },
+    close(socket) {
+      console.log('close');
+    },
+    drain(socket) {
+      console.log('drain');
+    },
     error(socket, error) {
       console.log(error);
     },
@@ -24,10 +38,3 @@ const socket = await Bun.connect({
     }, // connection timed out
   },
 });
-
-socket.write(`
--- Comment
-SELECT *, id AS user_id
-FROM users
-WHERE id = 1 AND name = 'John Doe';
-`);

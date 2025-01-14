@@ -10,11 +10,6 @@ export class LimitDataPlanStep extends PlanStep {
   }
 
   describe(): string[] {
-    return [
-      `OrderByPlanStep:`,
-      // `Columns: ${this.options.columns.map((c) => c.name).join(', ')}`,
-      // `From: ${this.options.dataPath}`,
-      // `Parts: (${this.options.parts.length}/${this.options.totalPartsCount})`, // ${this.options.parts.join(', ')}`,
-    ];
+    return [`OrderByPlanStep:`];
   }
 }

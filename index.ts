@@ -6,6 +6,8 @@ import { QueryPlanner } from './internals/query-planner.ts';
 
 type SocketData = { sessionId: string };
 
+const databaseManager = await new DatabaseManager('./data').loadMetadata();
+
 const server = Bun.listen<SocketData>({
   hostname: 'localhost',
   port: 8088,
@@ -24,8 +26,10 @@ const server = Bun.listen<SocketData>({
       console.log('timeout');
     },
     data(socket, data) {
+      console.log('data');
       const query = Buffer.from(data).toString();
-      const d = SqlParser.parse(query, 'default');
+      console.log(query);
+      const d = SqlParser.parse(query, 'default', databaseManager);
       console.log(d);
       socket.write(`${socket.data.sessionId}: ack`);
     },
@@ -53,47 +57,65 @@ const server = Bun.listen<SocketData>({
   },
 });
 
-const databaseManager = await new DatabaseManager('./data').loadMetadata();
-setTimeout(async () => {
-  // const parsedQuery = SqlParser.parse(
-  //   `SELECT name FROM users ORDER BY name DESC;`,
-  //   'default',
-  // );
-
-  // const parsedQuery = SqlParser.parse(
-  //   `SELECT * FROM firmy WHERE name = "Beer, West and Romaguera" ORDER BY id ASC LIMIT 10;`,
-  //   'default',
-  // );
-  // const parsedQuery = SqlParser.parse(`SELECT * FROM tickets;`, 'default');
-  const parsedQuery = SqlParser.parse(
-    `SELECT * FROM bookings WHERE pax > 0.5 AND oneWay = true AND departureDate <= Timestamp('${new Date(
-      Date.now(),
-    ).toISOString()}');`,
-    'default',
-    databaseManager,
-  );
-  console.log(JSON.stringify(parsedQuery.where, null, 2));
-  const queryPlanner = new QueryPlanner(databaseManager);
-  const queryExecutor = new QueryExecutor();
-
-  const plan = queryPlanner.planQuery(parsedQuery, {
-    enablePreWhereStep: false,
-  });
-
-  console.log(queryExecutor.describePlan(plan));
-  console.time('execute');
-  const res = await queryExecutor.execute(plan);
-  console.log(res.length);
-  console.timeEnd('execute');
-  process.exit(1);
-}, 1000);
+// setTimeout(async () => {
+//   // const parsedQuery = SqlParser.parse(
+//   //   `SELECT name FROM users ORDER BY name DESC;`,
+//   //   'default',
+//   // );
 //
-// server.reload({
-//   socket: {
-//     data(socket, data){
-//       console.log(data);
-//       // new 'data' handler
-//     }
-//   }
-// })
+//   // const parsedQuery = SqlParser.parse(
+//   //   `SELECT * FROM firmy WHERE name = "Beer, West and Romaguera" ORDER BY id ASC LIMIT 10;`,
+//   //   'default',
+//   // );
+//   // const parsedQuery = SqlParser.parse(`SELECT * FROM tickets;`, 'default');
+//   const parsedQuery = SqlParser.parse(
+//     // `SELECT * FROM bookings WHERE pax > 0.5 AND oneWay = true AND departureDate <= Timestamp('2024-11-02T12:06:48.561Z');`,
+//     `SELECT * FROM tickets WHERE origin = destination;`,
+//     'default',
+//     databaseManager,
+//   );
+//   const queryPlanner = new QueryPlanner(databaseManager);
+//   const queryExecutor = new QueryExecutor();
+//
+//   const plan = queryPlanner.planQuery(parsedQuery, {
+//     enablePreWhereStep: false,
+//   });
+//
+//   console.log(queryExecutor.describePlan(plan));
+//   console.time('execute');
+//   const res = await queryExecutor.execute(plan);
+//   console.log(res.length);
+//   console.log(res[0]);
+//   console.timeEnd('execute');
+//   process.exit(1);
+// }, 1000);
+//
+
+server.reload({
+  socket: {
+    async data(socket, data) {
+      console.log(data);
+      const query = Buffer.from(data).toString();
+      console.log(query);
+
+      const parsedQuery = SqlParser.parse(query, 'default', databaseManager);
+
+      const queryPlanner = new QueryPlanner(databaseManager);
+      const queryExecutor = new QueryExecutor();
+
+      const plan = queryPlanner.planQuery(parsedQuery, {
+        enablePreWhereStep: false,
+      });
+
+      console.log(queryExecutor.describePlan(plan));
+      console.time('execute');
+      const res = await queryExecutor.execute(plan);
+      console.log(res.length);
+      console.log(res[0]);
+      console.timeEnd('execute');
+      socket.write(Buffer.from(JSON.stringify(res)));
+      // new 'data' handler
+    },
+  },
+});
 // server.stop()

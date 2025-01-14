@@ -20,18 +20,21 @@ flowchart LR
 
 ```mermaid
 sequenceDiagram
-  participant  C as SQL Client
-  participant  S as SQL Server
+  participant  C as Klient
+  participant  S as Serwer
   participant  PQ as SQL Parser
   participant  P as SQL Planer
   participant  E as SQL Executor
   
-  C->>S: SEND SQL QUERY (SELECT * FROM users WHERE company = 1)
-  S->>PQ: Parse sql query
-  PQ->>S: Return {select: ['id'], table: users, where: {company: 1}}
-  S->>P: Plan sql query
+  C->>S: Wysłanie zapytania SQL <br>(SELECT * FROM users WHERE company = 1)
+  S->>PQ: Parsowanie zapytania SQL
+  PQ->>PQ: Walidacja wyniku parsowania
+  PQ->>S: Zwrócenie AST
+  S->>P: Zaplanowanie zapytania na podstawie AST
   P->>S: Return parts to load with paths, columns
-  P->>S: Return filter statements
-  S->>E: Execute sql query
+  P->>S: Zwrócenie kroków do wykonania danego zapytania
+  S->>E: Wykonanie zapytania
+  E->>S: Zwrócenie wyniku zapytania
+  S->>C: Zwrócenie wyników
 
 ```

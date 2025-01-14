@@ -20,6 +20,18 @@
     {
       "name": "bookings",
       "path": "./bookings/schema.json"
+    },
+    {
+      "name": "bookings2",
+      "path": "./bookings2/schema.json"
+    },
+    {
+      "name": "rezerwacje",
+      "path": "./rezerwacje/schema.json"
+    },
+    {
+      "name": "rezerwacje2",
+      "path": "./rezerwacje2/schema.json"
     }
   ]
 }

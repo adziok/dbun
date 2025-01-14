@@ -10,11 +10,6 @@ export class OffsetDataPlanStep extends PlanStep {
   }
 
   describe(): string[] {
-    return [
-      `OffsetDataPlanStep:`,
-      // `Columns: ${this.options.columns.map((c) => c.name).join(', ')}`,
-      // `From: ${this.options.dataPath}`,
-      // `Parts: (${this.options.parts.length}/${this.options.totalPartsCount})`, // ${this.options.parts.join(', ')}`,
-    ];
+    return [`OffsetDataPlanStep:`];
   }
 }
